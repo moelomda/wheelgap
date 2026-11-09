@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-- Add a recipes page with a free-threading readiness report using wheelgap JSON and `jq`.
-
 - `--ignore NAME` accepts known package gaps without failing CI, and lists ignored packages in text, JSON and Markdown reports. Repeat the flag or separate names with commas. (#119, thanks [@moelomda](https://github.com/moelomda))
 
 ## 0.6.3 (2026-11-09)
