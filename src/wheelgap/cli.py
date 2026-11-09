@@ -638,9 +638,9 @@ def main(argv: list[str] | None = None) -> int:
         apply_bundled(rows, targets, pyodide_lock)
     rows.sort(key=lambda r: r.package.key)
     ignore = {canonicalize_name(name.strip()) for item in args.ignore for name in item.split(",") if name.strip()}
-    ignored = sorted(
-        {r.package.name for r in rows if r.package.key in ignore}, key=str.lower
-    )  # as the table names them
+    # One entry per package, named as its first input writes it (PyYAML, not pyyaml).
+    first_names = {r.package.key: r.package.name for r in reversed(rows) if r.package.key in ignore}
+    ignored = sorted(first_names.values(), key=str.lower)
     rows = [r for r in rows if r.package.key not in ignore]
     gaps = [r for r in rows if not r.ok]
     source_labels = [s.label for s in sources]
