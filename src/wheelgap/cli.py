@@ -638,7 +638,7 @@ def main(argv: list[str] | None = None) -> int:
         apply_bundled(rows, targets, pyodide_lock)
     rows.sort(key=lambda r: r.package.key)
     ignore = {canonicalize_name(name.strip()) for item in args.ignore for name in item.split(",") if name.strip()}
-    ignored = sorted({r.package.key for r in rows if r.package.key in ignore})
+    ignored = sorted({r.package.name for r in rows if r.package.key in ignore}, key=str.lower)  # as the table names them
     rows = [r for r in rows if r.package.key not in ignore]
     gaps = [r for r in rows if not r.ok]
     source_labels = [s.label for s in sources]

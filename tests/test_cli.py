@@ -736,7 +736,7 @@ def test_ignore_canonicalizes_punctuation(capsys, fixtures, tmp_path):
     )
     data = json.loads(out)
     assert code == 0 and not err
-    assert data["ignored"] == ["new-glibc-core"]
+    assert data["ignored"] == ["new_glibc_core"]  # reported as the lockfile names it
     assert [p["name"] for p in data["packages"]] == ["armlib"]
 
 
