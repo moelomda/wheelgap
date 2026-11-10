@@ -5,9 +5,9 @@ Practical ways to check your project's dependencies with wheelgap.
 ## Multi-arch images
 
 Check both architectures before building an image for AMD64 and ARM64. This
-example uses `uv.lock` and a `Dockerfile` whose final stage is based on a
-supported Python image, such as `FROM python:3.13-slim-bookworm`, without
-pinning it to one architecture. Run it from the build context directory:
+example uses `uv.lock` and a `Dockerfile` whose final stage is based on an
+official `python` image or a Python-tagged `ghcr.io/astral-sh/uv` image, such as
+`FROM python:3.13-slim-bookworm`, without pinning it to one architecture. Run it from the build context directory:
 
 ```bash
 wheelgap uv.lock --dockerfile Dockerfile -t linux/amd64,linux/arm64 &&
@@ -19,8 +19,12 @@ wheelgap uv.lock --dockerfile Dockerfile -t linux/amd64,linux/arm64 &&
   Buildx. `--dockerfile` supplies the Python version and libc settings from
   the final image; for a supported Alpine image it checks musl wheels instead.
 - `&&` starts the build only if the check succeeds. With the default failure
-  policy, a source build, missing distribution or unknown result on either
-  architecture stops it. Input errors stop it too.
+  policy (unless `fail-on` is set in `pyproject.toml`), a source build, missing
+  distribution or unknown result on either architecture stops it. Input errors
+  stop it too.
+- In a CI script that runs under `set -e`, keep this as the step's last
+  command, or put `wheelgap` and `docker buildx build` on separate lines: a
+  failed check on the left of `&&` doesn't end the script by itself.
 - Use a Buildx builder configured for both platforms and OCI export, such as
   the `docker-container` builder in Docker's
   [multi-platform guide](https://docs.docker.com/build/building/multi-platform/).
