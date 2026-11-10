@@ -46,14 +46,17 @@ repository root with the same Python and deployment platform:
 wheelgap a/uv.lock b/uv.lock -p 3.13 -t linux-aarch64
 ```
 
-This produces one report for both inputs. It exits `1` for gaps and `2` for
-bad input, so a CI job can fail when either project needs attention.
+This produces one report for both inputs. The report doesn't say which
+lockfile a row comes from, and a package locked in both projects is listed once
+for each; use the loop below to see gaps per project. It exits `1` when a gap
+fails the check (see `--fail-on`) and `2` for bad input, so a CI job can fail
+when either project needs attention.
 
 Only `a/pyproject.toml`, next to the **first input**, supplies
 `[tool.wheelgap]` defaults for this combined run; `b/pyproject.toml` does not.
 The explicit `-p` and `-t` flags override those two defaults for both projects.
-Other settings from the first project, such as `glibc`, `ignore` and
-`fail-on`, still apply to both. Use the combined command when those settings
+Other settings from the first project, such as `glibc`, `ignore`, `fail-on`,
+`extras` and `groups`, still apply to both. Use the combined command when those settings
 are intended to be shared.
 
 To respect each project's own configuration instead, run a separate check
@@ -67,5 +70,6 @@ done
 
 Each invocation reads `[tool.wheelgap]` next to its own lockfile. Configure
 the intended Python and targets there, or add `-p` and `-t` to the command.
-The loop stops at the first failing check and preserves its exit code; a
-later successful check cannot hide an earlier gap or input error.
+The loop stops at the first failing check and exits with its code, so later
+lockfiles aren't checked and a later successful check can't hide an earlier gap
+or input error.
