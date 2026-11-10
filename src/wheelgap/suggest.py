@@ -3,7 +3,7 @@
 from packaging.version import InvalidVersion, Version
 
 from .check import Status, status_for
-from .pypi import _supports_python
+from .pypi import _files, _supports_python
 from .targets import Target
 
 
@@ -13,7 +13,8 @@ def nearest_with_wheel(releases: dict, pinned: str, target: Target) -> str | Non
     `releases` is the release-to-file-list mapping from the PyPI project JSON API.
     Pre-releases are considered only when `pinned` is itself a pre-release. Invalid
     release versions are skipped; an invalid pin raises `InvalidVersion`.
-    File Requires-Python metadata follows the same rules as range lookups.
+    File Requires-Python metadata follows the same rules as range lookups, and a release
+    whose file list is malformed is skipped, as range lookups skip it.
     """
     current = Version(pinned)
     candidates = []
@@ -26,9 +27,11 @@ def nearest_with_wheel(releases: dict, pinned: str, target: Target) -> str | Non
             candidates.append((version, text))
     python = f"{target.major}.{target.minor}"
     for _, text in sorted(candidates):
-        files = [
-            entry["filename"] for entry in releases[text] if not entry.get("yanked") and _supports_python(entry, python)
-        ]
+        try:
+            entries = _files(releases[text])
+        except ValueError:
+            continue
+        files = [entry["filename"] for entry in entries if not entry.get("yanked") and _supports_python(entry, python)]
         if status_for(files, target) is Status.WHEEL:
             return text
     return None
